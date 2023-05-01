@@ -291,6 +291,58 @@ with st.sidebar:
 
 st.title("PEV Theft Cost-Sharing Simulation")
 
+st.markdown(
+"""
+[Skip the explanation](#starting-conditions)
+
+This is a simulation tool to help understand the **StableCare** cost-sharing membership program, including: 
+- how it works
+- how the fees are calculated 
+- how much the membership might cost you
+
+### What is StableCare?
+
+StableCare is a theft insurance **alternative** designed to offer ***affordable theft coverage*** for PEV owners who:
+-  are unable to purchase theft insurance (because their vehicle is not covered); or
+-  feel the premiums for existing theft insurance are too damn high
+
+#### What makes StableCare different from traditional insurance?
+
+As an *alternative* to traditional theft insurance, StableCare aims to move away from the typical incentive structures of insurance. Because Traditional insurance companies keep the premiums they collect that aren't paid out to claimants, they are incentivized to maximize the premiums collected and minimize the claims paid out. 
+
+In contrast, StableCare shifts the cost of theft from the individual to a group of *members*, who **share** in the cost. Rather than overpaying a fixed preimum (a portion of which is kept by the insurance company), StableCare members pay an algorithmically-adjusted ***membership fee*** that changes to match the true rate of theft.
+
+As a result, your membership fees don't stay artificially high if there are fewer claims than expected. If the group of members takes steps to reduce the chance of theft, everyone benefits with lower monthly fees!
+
+#### How does StableCare work?
+
+The principle behind the StableCare cost-sharing method is fairly simple:
+
+- A common fund is initially capitalized through a refundable deposit from each of the members. 
+- Thereafter, monthly fees are collected from each of the members, which builds up money in the common fund. 
+- Over time, claims are paid out, which depletes money from the fund.
+- The monthly fees are dynamically adjusted to try to maintain a target amount of money in the fund (e.g., 10% of the total coverage amount)
+
+More specifically, the method works as follows:
+
+1. A group of members each pay an **initiation fee**, which functions like a reverse deductible and is a refundable deposit. The initiation fees serve to capitalize a common fund, into which monthly membership fees will also be paid, and from which claims will be paid out. 
+
+> *A conservative initiation fee is set at twice the annual theft rate (e.g., 10%, assuming a 5% annual theft rate).*
+
+2. Thereafter, members pay a monthly **membership fee**, which functions similarly to a premium. This membership fee is determined algorithmically (see algorithm description below), with the goal of maintaining a target amount of money in the fund. Thus, if the fund is fully- or *over*-capitalized, the monthly fees are reduced linearly from a **reference rate** (1/12 the expected annual theft rate) when the fund is at the target amount to 0% when the fund is at a designated maximum amount. Conversely, if the fund is *under*-capitalized, the monthly fees are increased above the reference rate to reach the target amount within a specified period of time (such as within 3 months) so as to reduce the risk of insolvency.
+3. Theft claims by members are submitted to Stable, who conducts the initial review of the evidence of the theft and considering the full context of the situation. Stable then issues an opinion and an initial decision of whether to pay out the claim. Once that opinion is issued, StableCare members are invited to review the decision and can either approve, veto, or abstain the decision. If a supermajority of the members veto Stable's decision, the decision is overridden—so a denial of a claim is switched to an approval, or vice versa. This gives the members the ultimate decision-making authority on whether a claim is paid out.
+4. If a member decides to leave the StableCare membership program ***and*** they did **not** submit and get paid out for any claims, then that member is entitled to a refund for their initiation fee.
+5. If a member submits a claim and it gets paid out, and subsequently wishes to continue their membership, that member will be required to pay another initiation fee.
+
+
+### How does this simulation work?
+
+StableCare is a theft insurance **alternative** designed to offer ***affordable theft coverage*** for PEV owners who:
+-  are unable to purchase theft insurance (because their vehicle is not covered); or
+-  feel the premiums for existing theft insurance are too damn high
+"""
+)
+
 with st.container():
     st.header("Starting Conditions")
     col1, col2, col3, col4 = st.columns(4)
