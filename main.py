@@ -17,7 +17,7 @@ INIT_MEMBER_2000 = 10
 INIT_MEMBER_2500 = 0
 
 INIT_INITIATION_FEE_PCT = 10
-INIT_MONTHLY_MEMBERSHIP_FEE_PCT = 1.0
+INIT_MONTHLY_MEMBERSHIP_FEE_PCT = 0.417
 INIT_TAKE_RATE_PCT = 10.0
 INIT_ANNUAL_THEFT_RATE_PCT = 5.0
 
@@ -198,6 +198,15 @@ def executeSimulation():
 
 
 with st.sidebar:
+    st.markdown("""
+# StableCare by Stable
+A theft insurance alternative for personal electric vehicles, such as e-scooters
+
+**Website:** https://stablemobility.io
+
+**Email:** hello@stablemobility.io
+""")
+
     st.header("Number of Members")
 
     st.number_input(
@@ -206,6 +215,7 @@ with st.sidebar:
         max_value=1000,
         value=INIT_MEMBER_500,
         step=1,
+        help="Number of members in the cost-sharing program with $500 of coverage",
         key="members_500"
     )
 
@@ -215,6 +225,7 @@ with st.sidebar:
         max_value=1000,
         value=INIT_MEMBER_1000,
         step=1,
+        help="Number of members in the cost-sharing program with $1,000 of coverage",
         key="members_1000"
     )
 
@@ -224,6 +235,7 @@ with st.sidebar:
         max_value=1000,
         value=INIT_MEMBER_1500,
         step=1,
+        help="Number of members in the cost-sharing program with $1,500 of coverage",
         key="members_1500"
     )
 
@@ -233,6 +245,7 @@ with st.sidebar:
         max_value=1000,
         value=INIT_MEMBER_2000,
         step=1,
+        help="Number of members in the cost-sharing program with $2,000 of coverage",
         key="members_2000"
     )
 
@@ -241,6 +254,7 @@ with st.sidebar:
         min_value=0,
         max_value=1000,
         value=INIT_MEMBER_2500,
+        help="Number of members in the cost-sharing program with $2,500 of coverage",
         step=1,
         key="members_2500"
     )
@@ -253,6 +267,7 @@ with st.sidebar:
         max_value=100,
         value=INIT_INITIATION_FEE_PCT,
         step=1,
+        help="The % of the total coverage should be collected initially as a refundable deposit",
         key="initiation_fee_pct"
     )
 
@@ -261,18 +276,19 @@ with st.sidebar:
         min_value=0.0,
         max_value=100.0,
         value=INIT_MONTHLY_MEMBERSHIP_FEE_PCT,
-        step=0.1,
+        step=0.001,
+        help="The % of total coverage that should be collected per month as a membership fee. When DRA is enabled, this variable only sets the monthly membership fee for the first monthly payment, and is adjusted each month automatically when the simulation is run.",
         key="monthly_membership_fee_pct"
     )
 
-    st.number_input(
-        label="Take rate (%)",
-        min_value=0.0,
-        max_value=25.0,
-        value=INIT_TAKE_RATE_PCT,
-        step=0.1,
-        key="take_rate_pct"
-    )
+    # st.number_input(
+        # label="Take rate (%)",
+        # min_value=0.0,
+        # max_value=25.0,
+        # value=INIT_TAKE_RATE_PCT,
+        # step=0.1,
+        # key="take_rate_pct"
+    # )
 
     st.header("Assumptions")
 
@@ -282,6 +298,7 @@ with st.sidebar:
         max_value=20.0,
         value=INIT_ANNUAL_THEFT_RATE_PCT,
         step=0.1,
+        help="The expected % of vehicles stolen each year",
         key="annual_theft_rate_pct"
     )
 
@@ -289,11 +306,11 @@ with st.sidebar:
 # APP #
 #######
 
-st.title("PEV Theft Cost-Sharing Simulation")
+st.title("PEV Theft Cost-Sharing Whitepaper & Simulation")
 
 st.markdown(
 """
-[Skip the explanation](#starting-conditions)
+[Skip the explantion => jump to the simulation](#starting-conditions)
 
 This is a simulation tool to help understand the **StableCare** cost-sharing membership program, including: 
 - how it works
@@ -310,11 +327,19 @@ StableCare is a theft insurance **alternative** designed to offer ***affordable 
 
 As an *alternative* to traditional theft insurance, StableCare aims to move away from the typical incentive structures of insurance. Because Traditional insurance companies keep the premiums they collect that aren't paid out to claimants, they are incentivized to maximize the premiums collected and minimize the claims paid out. 
 
-In contrast, StableCare shifts the cost of theft from the individual to a group of *members*, who **share** in the cost. Rather than overpaying a fixed preimum (a portion of which is kept by the insurance company), StableCare members pay an algorithmically-adjusted ***membership fee*** that changes to match the true rate of theft.
+In contrast, StableCare shifts the cost of theft from the individual to a group of *members*, who **share** in the cost. Rather than overpaying a fixed premium (a portion of which is kept by the insurance company), StableCare members pay an algorithmically-adjusted ***membership fee*** that changes to match the true rate of theft.
 
 As a result, your membership fees don't stay artificially high if there are fewer claims than expected. If the group of members takes steps to reduce the chance of theft, everyone benefits with lower monthly fees!
 
-#### How does StableCare work?
+#### How is dynamic, algorithmically-adjusted membership fees better than flat monthly premiums?
+
+If you pay a flat monthly premium for insurance, and the insurance company doesn't quickly go out of business, then you're likely *overpaying* for insurance. Typically, insurance companies design their premiums such that they only pay out ~60% of what they collect in claims—which is known as the **loss ratio** in the insurance world. This means that about 40% of your premium payments form the gross profit margin for the insurance company (more specifically, the entities in the insurance value chain, such as the broker/agent, carrier, and other middlemen).
+
+Designing premiums to have such a generous margin is considered best practice for insurance carriers to ensure that they bring in enough money to pay out more claims than expected (within some margin of error). But what happens if there are fewer claim payouts than expected? Traditional insurance companies simply collect these excess premiums as additional profit.
+
+A dynamically-adjusted fee is more fair because it reduces your monthly payments if there are fewer claims than expected, and *only* increases those payments if there are more claims than expected. And by making the dynamic rate adjustment based on a published algorithm (see below), StableCare is fully transparent in its approach to adjusting the rates. We have no incentive to make the rates higher than is necessary to prevent insolvency, and are specifically incentivized to help reduce the monthly fee to ensure that StableCare members are happy with their coverage.
+
+### How does StableCare work?
 
 The principle behind the StableCare cost-sharing method is fairly simple:
 
@@ -334,14 +359,59 @@ More specifically, the method works as follows:
 4. If a member decides to leave the StableCare membership program ***and*** they did **not** submit and get paid out for any claims, then that member is entitled to a refund for their initiation fee.
 5. If a member submits a claim and it gets paid out, and subsequently wishes to continue their membership, that member will be required to pay another initiation fee.
 
-
 ### How does this simulation work?
 
-StableCare is a theft insurance **alternative** designed to offer ***affordable theft coverage*** for PEV owners who:
--  are unable to purchase theft insurance (because their vehicle is not covered); or
--  feel the premiums for existing theft insurance are too damn high
+This simulation models the StableCare cost-sharing membership program described above, and offers a variety of parameters that can be tuned and simulated to help understand how monthly fees might range between in various scenarios, predict the likelihood that the fund becomes insolvent (i.e., total funds fall below $0), and more.
+
+#### General Parameters
+
+- You can adjust the **number of members** with different amounts of coverage in the sidebar to the left.
+- **Initiation fee**: set what % of the total coverage should be collected initially as a refundable deposit
+- **Monthly membership fee**: set the % of total coverage that should be collected per month as a membership fee. This number should be set to 1/12 of the expected annual theft rate intially. When DRA is enabled, this variable only sets the monthly membership fee for the first monthly payment, and is adjusted each month automatically when the simulation is run.
+- **Annual theft rate**: the expected % of vehicles stolen each year. Depending on what city you live in, this is likely to be somewhere between 2-5% based on bike theft data derived from police reports. *You'll see that the annual theft rate has the largest effect on the monthly membership fees*.
+- **Number of months**: the number of months to run the simulation
+- **Number of iterations**: the number of times to run the simulation (up to 100 per simulation)
+
+#### Dynamic Rate Adjustment (DRA)
+
+Dynamic Rate Adjustment (DRA) is an algorithm designed to make small adjustments to the members' monthly membership fee rates such that members don't overpay for theft coverage. Rather than simply saying this and providing an opaque, marketing-speak explanation for how this helps the members, we provide the methodology below (and welcome your feedback at feedback@stablemobility.io).
+
+The DRA parameters include:
+- **Target fund amount**: the amount of money that the algorithm attempts to maintain in the fund, as a % of total coverage
+- **Max fund amount**: if the fund reaches this level of overfunding (as a % of total coverage), monthly fees drop to $0
+- **Number of months to reach target**: How aggressively to raise membership fees if the fund is underfunded; roughly the number of months it would take to return back to the target fund amount. Lower number = larger rate spikes and lower risk of insolvency. Higher number = lower rate spikes and higher risk of insolvency.
+
+The algorithm works as follows:
+
+1. Begin with the current month's total fund value (month *i*)
 """
 )
+
+st.latex(r'''
+FundValue_{i} = FundValue_{i-1} + (FundValue_{i-1} * MonthlyRate_{i-1}) + (ClaimAmountPaid_{i-1}) 
+''')
+st.markdown("""
+2. Calculate the difference between the current month's total fund value and the target fund amount
+""")
+st.latex(r'''
+Diff_{i} = FundValue_{i} - TargetFundAmt
+''')
+st.markdown("""
+3. If the difference is positive or zero (*overfunded*), linearly determine the fee rate between 1/12 the annual theft rate (if total fund value == target fund amount) and 0% (if the total fund value >= maximum fund amount)
+4. If the difference is negative (*underfunded*), calculate the fee rate such that membership fees would return the fund back to the target fund amount within a specified number of months
+""")
+st.latex(r'''
+MonthlyRate_i = \begin{cases}
+   TheftRate \left( \frac{MaxFundAmt - TargetFundAmt - Diff_i}{MaxFundAmt - TargetFundAmt} \right) &\text{if } Diff_i \geq 0 \\
+   TheftRate + \left( \frac{ \left( \frac{-1 * Diff_i}{NumMos} \right)}{TotalCoverage} \right) &\text{if } Diff_i \lt 0
+\end{cases}
+''')
+
+st.markdown("""
+This process is repeated each month to calculate the new rates.
+""")
+
+# - **Take Rate**: this is the flat fee that we set to cover the cost of running StableCare. Currently not implemented in the simulation
 
 with st.container():
     st.header("Starting Conditions")
@@ -402,7 +472,7 @@ with st.container():
 
     st.checkbox(
         label="Enable DRA",
-        value=False,
+        value=True,
         key="dyn_rate_adjust"
     )
 
@@ -431,7 +501,7 @@ with st.container():
             label="Number of months to reach target",
             min_value=1,
             max_value=12,
-            value=3,
+            value=6,
             step=1,
             key="num_months_to_target",
             help="""
@@ -492,7 +562,124 @@ try:
     tab500, tab1000, tab1500, tab2000, tab2500 = st.tabs(["$500", "$1K", "$1.5K", "$2K", "$2.5K"])
 
     with tab500:
-        st.subheader('To be implemented (check out $1000)')
+        st.subheader('Premiums per month ($500 coverage)')
+        fig_premiums_500_per_month = px.line(
+            st.session_state['premiums_500'],
+            x="month",
+            y=y_cols
+        )
+        st.plotly_chart(fig_premiums_500_per_month)
+
+        # calculate some stats
+        summary_cols_500 = ['id', 'avg_fee', 'median_fee', 'min_fee', 'max_fee', 'total_fee']
+        #data = [ [] for i in range(len(y_cols)) ]
+        data_500 = []
+
+        for i in range(len(y_cols)):
+            data_col = st.session_state['premiums_500'][y_cols[i]]
+            data_500.append([
+                y_cols[i],
+                round(data_col.mean(), 2),
+                round(data_col.median(), 2),
+                round(data_col.min(), 2),
+                round(data_col.max(), 2),
+                round(data_col.sum(), 2)
+            ])
+
+        df_summary_500 = pd.DataFrame(data_500, columns=summary_cols_500)
+
+        col500_1, col500_2, col500_3, col500_4 = st.columns(4)
+
+        with col500_1:
+            st.metric(
+                label="Minimum average fee",
+                value=f"${df_summary_500['avg_fee'].min():.2f}"
+            )
+            st.metric(
+                label="Minimum median fee",
+                value=f"${df_summary_500['median_fee'].min():.2f}"
+            )
+            st.metric(
+                label="Minimum highest fee",
+                value=f"${df_summary_500['max_fee'].min():.2f}"
+            )
+            st.metric(
+                label="Minimum lowest fee",
+                value=f"${df_summary_500['min_fee'].min():.2f}"
+            )
+            st.metric(
+                label="Minimum total fees",
+                value=f"${df_summary_500['total_fee'].min():.2f}"
+            )
+
+        with col500_2:
+            st.metric(
+                label="Mean average fee",
+                value=f"${df_summary_500['avg_fee'].mean():.2f}"
+            )
+            st.metric(
+                label="Mean median fee",
+                value=f"${df_summary_500['median_fee'].mean():.2f}"
+            )
+            st.metric(
+                label="Mean highest fee",
+                value=f"${df_summary_500['max_fee'].mean():.2f}"
+            )
+            st.metric(
+                label="Mean lowest fee",
+                value=f"${df_summary_500['min_fee'].mean():.2f}"
+            )
+            st.metric(
+                label="Mean total fee",
+                value=f"${df_summary_500['total_fee'].mean():.2f}"
+            )
+
+        with col500_3:
+            st.metric(
+                label="Median average fee",
+                value=f"${df_summary_500['avg_fee'].median():.2f}"
+            )
+            st.metric(
+                label="Median median fee",
+                value=f"${df_summary_500['median_fee'].median():.2f}"
+            )
+            st.metric(
+                label="Median highest fee",
+                value=f"${df_summary_500['max_fee'].median():.2f}"
+            )
+            st.metric(
+                label="Median lowest fee",
+                value=f"${df_summary_500['min_fee'].median():.2f}"
+            )
+            st.metric(
+                label="Median total fee",
+                value=f"${df_summary_500['total_fee'].median():.2f}"
+            )
+
+        with col500_4:
+            st.metric(
+                label="Max average fee",
+                value=f"${df_summary_500['avg_fee'].max():.2f}"
+            )
+            st.metric(
+                label="Max median fee",
+                value=f"${df_summary_500['median_fee'].max():.2f}"
+            )
+            st.metric(
+                label="Max highest fee",
+                value=f"${df_summary_500['max_fee'].max():.2f}"
+            )
+            st.metric(
+                label="Max lowest fee",
+                value=f"${df_summary_500['min_fee'].max():.2f}"
+            )
+            st.metric(
+                label="Max total fee",
+                value=f"${df_summary_500['total_fee'].max():.2f}"
+            )
+
+        with st.expander("All summary data"):
+            st.dataframe(df_summary_500)
 
     with tab1000:
         st.subheader('Premiums per month ($1000 coverage)')
@@ -615,13 +802,364 @@ try:
             st.dataframe(df_summary_1000)
 
     with tab1500:
-        st.subheader('To be implemented (check out $1000)')
+        st.subheader('Premiums per month ($1500 coverage)')
+        fig_premiums_1500_per_month = px.line(
+            st.session_state['premiums_1500'],
+            x="month",
+            y=y_cols
+        )
+        st.plotly_chart(fig_premiums_1500_per_month)
+
+        # calculate some stats
+        summary_cols_1500 = ['id', 'avg_fee', 'median_fee', 'min_fee', 'max_fee', 'total_fee']
+        #data = [ [] for i in range(len(y_cols)) ]
+        data_1500 = []
+
+        for i in range(len(y_cols)):
+            data_col = st.session_state['premiums_1500'][y_cols[i]]
+            data_1500.append([
+                y_cols[i],
+                round(data_col.mean(), 2),
+                round(data_col.median(), 2),
+                round(data_col.min(), 2),
+                round(data_col.max(), 2),
+                round(data_col.sum(), 2)
+            ])
+
+        df_summary_1500 = pd.DataFrame(data_1500, columns=summary_cols_1500)
+
+        col1500_1, col1500_2, col1500_3, col1500_4 = st.columns(4)
+
+        with col1500_1:
+            st.metric(
+                label="Minimum average fee",
+                value=f"${df_summary_1500['avg_fee'].min():.2f}"
+            )
+            st.metric(
+                label="Minimum median fee",
+                value=f"${df_summary_1500['median_fee'].min():.2f}"
+            )
+            st.metric(
+                label="Minimum highest fee",
+                value=f"${df_summary_1500['max_fee'].min():.2f}"
+            )
+            st.metric(
+                label="Minimum lowest fee",
+                value=f"${df_summary_1500['min_fee'].min():.2f}"
+            )
+            st.metric(
+                label="Minimum total fees",
+                value=f"${df_summary_1500['total_fee'].min():.2f}"
+            )
+
+        with col1500_2:
+            st.metric(
+                label="Mean average fee",
+                value=f"${df_summary_1500['avg_fee'].mean():.2f}"
+            )
+            st.metric(
+                label="Mean median fee",
+                value=f"${df_summary_1500['median_fee'].mean():.2f}"
+            )
+            st.metric(
+                label="Mean highest fee",
+                value=f"${df_summary_1500['max_fee'].mean():.2f}"
+            )
+            st.metric(
+                label="Mean lowest fee",
+                value=f"${df_summary_1500['min_fee'].mean():.2f}"
+            )
+            st.metric(
+                label="Mean total fee",
+                value=f"${df_summary_1500['total_fee'].mean():.2f}"
+            )
+
+        with col1500_3:
+            st.metric(
+                label="Median average fee",
+                value=f"${df_summary_1500['avg_fee'].median():.2f}"
+            )
+            st.metric(
+                label="Median median fee",
+                value=f"${df_summary_1500['median_fee'].median():.2f}"
+            )
+            st.metric(
+                label="Median highest fee",
+                value=f"${df_summary_1500['max_fee'].median():.2f}"
+            )
+            st.metric(
+                label="Median lowest fee",
+                value=f"${df_summary_1500['min_fee'].median():.2f}"
+            )
+            st.metric(
+                label="Median total fee",
+                value=f"${df_summary_1500['total_fee'].median():.2f}"
+            )
+
+        with col1500_4:
+            st.metric(
+                label="Max average fee",
+                value=f"${df_summary_1500['avg_fee'].max():.2f}"
+            )
+            st.metric(
+                label="Max median fee",
+                value=f"${df_summary_1500['median_fee'].max():.2f}"
+            )
+            st.metric(
+                label="Max highest fee",
+                value=f"${df_summary_1500['max_fee'].max():.2f}"
+            )
+            st.metric(
+                label="Max lowest fee",
+                value=f"${df_summary_1500['min_fee'].max():.2f}"
+            )
+            st.metric(
+                label="Max total fee",
+                value=f"${df_summary_1500['total_fee'].max():.2f}"
+            )
+
+        with st.expander("All summary data"):
+            st.dataframe(df_summary_1500)
 
     with tab2000:
-        st.subheader('To be implemented (check out $1000)')
+        st.subheader('Premiums per month ($2000 coverage)')
+        fig_premiums_2000_per_month = px.line(
+            st.session_state['premiums_2000'],
+            x="month",
+            y=y_cols
+        )
+        st.plotly_chart(fig_premiums_2000_per_month)
+
+        # calculate some stats
+        summary_cols_2000 = ['id', 'avg_fee', 'median_fee', 'min_fee', 'max_fee', 'total_fee']
+        #data = [ [] for i in range(len(y_cols)) ]
+        data_2000 = []
+
+        for i in range(len(y_cols)):
+            data_col = st.session_state['premiums_2000'][y_cols[i]]
+            data_2000.append([
+                y_cols[i],
+                round(data_col.mean(), 2),
+                round(data_col.median(), 2),
+                round(data_col.min(), 2),
+                round(data_col.max(), 2),
+                round(data_col.sum(), 2)
+            ])
+
+        df_summary_2000 = pd.DataFrame(data_2000, columns=summary_cols_2000)
+
+        col2000_1, col2000_2, col2000_3, col2000_4 = st.columns(4)
+
+        with col2000_1:
+            st.metric(
+                label="Minimum average fee",
+                value=f"${df_summary_2000['avg_fee'].min():.2f}"
+            )
+            st.metric(
+                label="Minimum median fee",
+                value=f"${df_summary_2000['median_fee'].min():.2f}"
+            )
+            st.metric(
+                label="Minimum highest fee",
+                value=f"${df_summary_2000['max_fee'].min():.2f}"
+            )
+            st.metric(
+                label="Minimum lowest fee",
+                value=f"${df_summary_2000['min_fee'].min():.2f}"
+            )
+            st.metric(
+                label="Minimum total fees",
+                value=f"${df_summary_2000['total_fee'].min():.2f}"
+            )
+
+        with col2000_2:
+            st.metric(
+                label="Mean average fee",
+                value=f"${df_summary_2000['avg_fee'].mean():.2f}"
+            )
+            st.metric(
+                label="Mean median fee",
+                value=f"${df_summary_2000['median_fee'].mean():.2f}"
+            )
+            st.metric(
+                label="Mean highest fee",
+                value=f"${df_summary_2000['max_fee'].mean():.2f}"
+            )
+            st.metric(
+                label="Mean lowest fee",
+                value=f"${df_summary_2000['min_fee'].mean():.2f}"
+            )
+            st.metric(
+                label="Mean total fee",
+                value=f"${df_summary_2000['total_fee'].mean():.2f}"
+            )
+
+        with col2000_3:
+            st.metric(
+                label="Median average fee",
+                value=f"${df_summary_2000['avg_fee'].median():.2f}"
+            )
+            st.metric(
+                label="Median median fee",
+                value=f"${df_summary_2000['median_fee'].median():.2f}"
+            )
+            st.metric(
+                label="Median highest fee",
+                value=f"${df_summary_2000['max_fee'].median():.2f}"
+            )
+            st.metric(
+                label="Median lowest fee",
+                value=f"${df_summary_2000['min_fee'].median():.2f}"
+            )
+            st.metric(
+                label="Median total fee",
+                value=f"${df_summary_2000['total_fee'].median():.2f}"
+            )
+
+        with col2000_4:
+            st.metric(
+                label="Max average fee",
+                value=f"${df_summary_2000['avg_fee'].max():.2f}"
+            )
+            st.metric(
+                label="Max median fee",
+                value=f"${df_summary_2000['median_fee'].max():.2f}"
+            )
+            st.metric(
+                label="Max highest fee",
+                value=f"${df_summary_2000['max_fee'].max():.2f}"
+            )
+            st.metric(
+                label="Max lowest fee",
+                value=f"${df_summary_2000['min_fee'].max():.2f}"
+            )
+            st.metric(
+                label="Max total fee",
+                value=f"${df_summary_2000['total_fee'].max():.2f}"
+            )
+
+        with st.expander("All summary data"):
+            st.dataframe(df_summary_2000)
 
     with tab2500:
-        st.subheader('To be implemented (check out $1000)')
+        st.subheader('Premiums per month ($2500 coverage)')
+        fig_premiums_2500_per_month = px.line(
+            st.session_state['premiums_2500'],
+            x="month",
+            y=y_cols
+        )
+        st.plotly_chart(fig_premiums_2500_per_month)
+
+        # calculate some stats
+        summary_cols_2500 = ['id', 'avg_fee', 'median_fee', 'min_fee', 'max_fee', 'total_fee']
+        #data = [ [] for i in range(len(y_cols)) ]
+        data_2500 = []
+
+        for i in range(len(y_cols)):
+            data_col = st.session_state['premiums_2500'][y_cols[i]]
+            data_2500.append([
+                y_cols[i],
+                round(data_col.mean(), 2),
+                round(data_col.median(), 2),
+                round(data_col.min(), 2),
+                round(data_col.max(), 2),
+                round(data_col.sum(), 2)
+            ])
+
+        df_summary_2500 = pd.DataFrame(data_2500, columns=summary_cols_2500)
+
+        col2500_1, col2500_2, col2500_3, col2500_4 = st.columns(4)
+
+        with col2500_1:
+            st.metric(
+                label="Minimum average fee",
+                value=f"${df_summary_2500['avg_fee'].min():.2f}"
+            )
+            st.metric(
+                label="Minimum median fee",
+                value=f"${df_summary_2500['median_fee'].min():.2f}"
+            )
+            st.metric(
+                label="Minimum highest fee",
+                value=f"${df_summary_2500['max_fee'].min():.2f}"
+            )
+            st.metric(
+                label="Minimum lowest fee",
+                value=f"${df_summary_2500['min_fee'].min():.2f}"
+            )
+            st.metric(
+                label="Minimum total fees",
+                value=f"${df_summary_2500['total_fee'].min():.2f}"
+            )
+
+        with col2500_2:
+            st.metric(
+                label="Mean average fee",
+                value=f"${df_summary_2500['avg_fee'].mean():.2f}"
+            )
+            st.metric(
+                label="Mean median fee",
+                value=f"${df_summary_2500['median_fee'].mean():.2f}"
+            )
+            st.metric(
+                label="Mean highest fee",
+                value=f"${df_summary_2500['max_fee'].mean():.2f}"
+            )
+            st.metric(
+                label="Mean lowest fee",
+                value=f"${df_summary_2500['min_fee'].mean():.2f}"
+            )
+            st.metric(
+                label="Mean total fee",
+                value=f"${df_summary_2500['total_fee'].mean():.2f}"
+            )
+
+        with col2500_3:
+            st.metric(
+                label="Median average fee",
+                value=f"${df_summary_2500['avg_fee'].median():.2f}"
+            )
+            st.metric(
+                label="Median median fee",
+                value=f"${df_summary_2500['median_fee'].median():.2f}"
+            )
+            st.metric(
+                label="Median highest fee",
+                value=f"${df_summary_2500['max_fee'].median():.2f}"
+            )
+            st.metric(
+                label="Median lowest fee",
+                value=f"${df_summary_2500['min_fee'].median():.2f}"
+            )
+            st.metric(
+                label="Median total fee",
+                value=f"${df_summary_2500['total_fee'].median():.2f}"
+            )
+
+        with col2500_4:
+            st.metric(
+                label="Max average fee",
+                value=f"${df_summary_2500['avg_fee'].max():.2f}"
+            )
+            st.metric(
+                label="Max median fee",
+                value=f"${df_summary_2500['median_fee'].max():.2f}"
+            )
+            st.metric(
+                label="Max highest fee",
+                value=f"${df_summary_2500['max_fee'].max():.2f}"
+            )
+            st.metric(
+                label="Max lowest fee",
+                value=f"${df_summary_2500['min_fee'].max():.2f}"
+            )
+            st.metric(
+                label="Max total fee",
+                value=f"${df_summary_2500['total_fee'].max():.2f}"
+            )
+
+        with st.expander("All summary data"):
+            st.dataframe(df_summary_2500)
 
 
 except KeyError:
